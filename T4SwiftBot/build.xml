@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="piremote" name="Build Project">
+
+	<property name="raspberrypi" value="${ip_from_user}" />
+	<property name="password" value="${password_from_user}" />
+	<input message="Enter the name of your main class" addproperty="mainclass" />
+
+	<!-- Setup build properties -->
+	<property name="raspberryfolder" value="~/Documents" />
+	<property name="username" value="pi" />
+	<property name="dir.buildfile" value="." />
+	<property name="dir.workspace" value="${basedir}" />
+	<property name="dir.jarfile" value="${basedir}" />
+	<property name="student_jar" value="YourCode.jar" />
+
+	<pathconvert property="relative.dir">
+		<path location="${class_from_user}" />
+		<globmapper from="${basedir}/*" to="./*" />
+	</pathconvert>
+
+	<echo>${basedir}</echo>
+	<echo>${dir.buildfile}</echo>
+	<echo>${class_from_user}</echo>
+	<echo>${relative.dir}</echo>
+
+	<!-- Make the .jar -->
+	<target name="piremote">
+		<!-- https://stackoverflow.com/questions/9886802/how-to-get-a-filename-and-set-it-as-a-property-in-ant -->
+		<!-- read your fileset into a property formatted as a list of lines -->
+		<pathconvert property="file.list" pathsep="${line.separator}">
+			<map from="${basedir}${file.separator}" to="" />
+			<fileset dir="${basedir}/lib">
+				<include name="SwiftBotAPI-*" />
+			</fileset>
+		</pathconvert>
+
+		<!-- extract a single target file from the list -->
+		<loadresource property="file.name">
+			<string value="${file.list}" />
+			<filterchain>
+				<!-- add your own logic to deal with multiple matches -->
+				<headfilter lines="1" />
+			</filterchain>
+		</loadresource>
+
+		<!-- print the result -->
+		<echo message="Found SwiftBotAPI: ${file.name}" />
+
+		<jar destfile="${student_jar}" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="${mainclass}" />
+				<attribute name="Class-Path" value="." />
+			</manifest>
+
+			<fileset dir="${basedir}/bin" />
+			<zipfileset excludes="META-INF/*.SF" src="${basedir}/${file.name}" />
+		</jar>
+
+		<basename file="${student_jar}" property="jar.filename" />
+		<echo>"Found application ${jar.filename}"</echo>
+
+		<!-- Copy the .jar over to the Swift Bot -->
+		<echo>"Copying application to ${raspberrypi}:${raspberryfolder}/${jar.filename}"</echo>
+		<scp
+			localfile="${jar.filename}"
+			todir="${username}:${password}@${raspberrypi}:${raspberryfolder}" trust="true" />
+
+	</target>
+
+</project>
