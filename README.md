@@ -11,6 +11,7 @@ The robot we used was raspberry Pi powered robot with two motors for the wheels,
 I used APIs to use these components and I used OOP practices as well as control flow, loops and other programming practices. 
 I ran many tests and learnt how to debug the code.
 
+![SwiftBot](https://github.com/bart-03/SwiftBot/assets/145933356/fed2bbcf-5158-4a8e-8b97-1cdd5c75fc97)
 
 
 
